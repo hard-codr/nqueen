@@ -40,8 +40,8 @@ public class NQueen {
         //We also find out second queens distance from third queen at the same time.
         //- 'distance[j][j+(j-i)] indicates that value.
         //here we chosen third queen which is at j+(j-i) x-distance, i.e. (j-i) distance from second queen.
-        //- so we have first and second at j distance apart
-        //- and second and third at j distance apart.
+        //- so we have first and second at x-distance apart
+        //- and second and third at same x-distance apart.
         //- now if their y-distance matches (i.e. distance[i][j] ==  distance[j][j+(j-i)]) then we have three queen at some some angle
         //  as described by 'Angle condition' above. hence we reject this position and find out some other position for current queen.
         for(int i = 0; i < row + 1; i++) {
