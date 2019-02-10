@@ -25,8 +25,8 @@ public class NQueen {
         //- and second and third at same k*x-distance apart. where (k = ... 1/4, 1/3, 1/2, 1, 2, 3, 4... etc)
         //- now if their y-distance matches by equation distance[i][j] ==  distance[j][j+(j-i)]*(1/k) then we have three queen at some some angle
         //  as described by 'Angle condition' above. hence we reject this position and find out some other position for current queen.
-        for(int i = 0; i < row + 1; i++) {
-            for(int j = i + 1; j < row + 1; j++) {
+        for(int i = 0; i < row; i++) {
+            for(int j = i + 1; j < row; j++) {
 
                 int baseXDistance = j - i;
                 if(j + baseXDistance < row + 1 && distance[i][j] == distance[j][j + baseXDistance]) {
