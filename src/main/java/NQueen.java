@@ -1,4 +1,111 @@
+import java.util.stream.Stream;
+
 public class NQueen {
+    /**
+     * Check for angle condition
+     * @param distance distance array (populate until row elements)
+     * @param row how much of distances are populate
+     * @return true if the NONE of the three queen are at some angle, false otherwise
+     */
+    boolean checkAngleCondition(int distance[][], int row) {
+        int N = distance.length;
+        //'Angle condition':
+        //3 queens a, b, c will form some angle if they have same slope between them.
+        // i.e. x-coordinate difference between a,b will be equal to (or fraction/multiple of) x-coordinate difference between b,c
+        //      AND y-coordinate difference between a,b will be equal to (or SAME fraction/multiple of) y-coordinate difference between b,c
+        //
+        //As stated above (i, j)th entry in distance array contains distance between queen i and j queens.
+        //
+        //so we will first find out each queen's y-axis distance from one queen below (across x-axis) at increasing distance.
+        //(i.e. first we will find out y-distance between queen at one x-distance apart, then two x-distance apart (j variable does that) and so on.
+        //- 'distance[i][j]' indicates that value.
+        //We also find out second queens some (j-i)*k distance from third queen at the same time. (k can be multiple or fraction)
+        //- 'distance[j][j+(j-i)*k]' indicates that value.
+        //- so we have first and second at x-distance apart
+        //- and second and third at same k*x-distance apart. where (k = ... 1/4, 1/3, 1/2, 1, 2, 3, 4... etc)
+        //- now if their y-distance matches by equation distance[i][j] ==  distance[j][j+(j-i)]*(1/k) then we have three queen at some some angle
+        //  as described by 'Angle condition' above. hence we reject this position and find out some other position for current queen.
+        for(int i = 0; i < row + 1; i++) {
+            for(int j = i + 1; j < row + 1; j++) {
+
+                int baseXDistance = j - i;
+                if(j + baseXDistance < row + 1 && distance[i][j] == distance[j][j + baseXDistance]) {
+                    //x-distance between a, b is equal to x-distance between b, c AND
+                    //y-distance between a, b is equal to y-distance between b, c
+                    return false;
+                }
+
+                for(int k = 2; k <= (row+1)/2; k++) {
+                    if (k <= baseXDistance) { //k which can evenly divides baseXDistance e.g. if j-i is 6 then, k will be 2, 3
+                        int fractionXDistance = baseXDistance / k;
+                        //check whether j + fractions of baseXDistance are within range (row + 1)
+                        //if j-i=8 then j + fractions will be j+4, j+2, etc
+                        if (baseXDistance % k == 0 && j + fractionXDistance < row + 1) {
+                            int fractionYDistance = distance[j][j + fractionXDistance];
+                            if (distance[i][j] == fractionYDistance * k) {
+                                return false;
+                            }
+                        }
+                    } else {
+                        break;
+                    }
+                }
+
+                for(int k = 2; k <= (N-j)/(j-i); k++) {
+                    int multipleXDistance = baseXDistance*k;
+                    //check whether j + multiples of baseXDistance are within range (row + 1)
+                    //if j-i=2 then j + multiples will be j+4, j+8, etc
+                    if(j + multipleXDistance < row + 1) {
+                        int multipleYDistance = distance[j][j + multipleXDistance];
+                        if(distance[i][j]*k == multipleYDistance) {
+                            return false;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Brute force way to search whether any three queen form some angle. Always performs worse than checkAngleCondition above (for N > 20).
+     * Used for checking the result of the checkAngleCondition.
+     * @param distance distance array (populate until row elements)
+     * @param row how much of distances are populate
+     * @return true if the NONE of the three queen are at some angle, false otherwise
+     */
+    boolean checkAngleConditionBrute(int[][] distance, int row) {
+        for(int i = 0; i < row + 1; i++) {
+            for (int j = i + 1; j < row + 1; j++) {
+                for (int k = j + 1; k < row + 1; k++) {
+                    int distXij = j - i;
+                    int distXjk = k - j;
+                    int distYij = distance[i][j];
+                    int distYjk = distance[j][k];
+
+                    if(distXij == distXjk) {
+                        if (distYij == distYjk) {
+                            return false;
+                        }
+                    } else if(distXij > distXjk && distXij % distXjk == 0) {
+                        if(distYij % distYjk == 0 && distXij/distXjk == distYij/distYjk) {
+                            return  false;
+                        }
+                    } else if(distXij < distXjk && distXjk % distXij == 0) {
+                        if(distYjk % distYij == 0 && distXjk/distXij == distYjk/distYij) {
+                            return  false;
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     /**
      * Check whether it is ok to place queen in 'row'th row at 'col'th column on chessboard.
      * Assumption: All the previous queens are in correct position as indicated by the board array.
@@ -27,32 +134,7 @@ public class NQueen {
             distance[i][row] = col - board[i];
         }
 
-        //'Angle condition':
-        //3 queens a, b, c will form some angle if they will same horizontal distance (x-coordinate) and vertical distance (y-coordinate) between them.
-        // i.e. x-coordinate difference between a,b will be equal to x-coordinate difference between b,c
-        //      AND y-coordinate difference between a,b will be equal to y-coordinate difference between b,c
-        //
-        //As stated above (i, j)th entry in distance array contains distance between queen i and j queens.
-        //
-        //so we will first find out each queen's y-axis distance from one queen below (across x-axis) at increasing distance.
-        //(i.e. first we will find out y-distance between queen at one x-distance apart, then two x-distance apart (j variable does that) and so on.
-        //- 'distance[i][j]' indicates that value.
-        //We also find out second queens distance from third queen at the same time.
-        //- 'distance[j][j+(j-i)] indicates that value.
-        //here we chosen third queen which is at j+(j-i) x-distance, i.e. (j-i) distance from second queen.
-        //- so we have first and second at x-distance apart
-        //- and second and third at same x-distance apart.
-        //- now if their y-distance matches (i.e. distance[i][j] ==  distance[j][j+(j-i)]) then we have three queen at some some angle
-        //  as described by 'Angle condition' above. hence we reject this position and find out some other position for current queen.
-        for(int i = 0; i < row + 1; i++) {
-            for(int j = i + 1; (2*j - i) < row + 1; j++) {
-                if(distance[i][j] == distance[j][2*j - i]) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        return checkAngleCondition(distance, row);
     }
 
     private boolean solveInner(int board[], int row, int distance[][]) {
