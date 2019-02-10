@@ -35,19 +35,16 @@ public class NQueen {
                     return false;
                 }
 
-                for(int k = 2; k <= (row+1)/2; k++) {
-                    if (k <= baseXDistance) { //k which can evenly divides baseXDistance e.g. if j-i is 6 then, k will be 2, 3
-                        int fractionXDistance = baseXDistance / k;
-                        //check whether j + fractions of baseXDistance are within range (row + 1)
-                        //if j-i=8 then j + fractions will be j+4, j+2, etc
-                        if (baseXDistance % k == 0 && j + fractionXDistance < row + 1) {
-                            int fractionYDistance = distance[j][j + fractionXDistance];
-                            if (distance[i][j] == fractionYDistance * k) {
-                                return false;
-                            }
+                int MAXFK = Math.min(baseXDistance, (row+1)/2);
+                for(int k = 2; k <= MAXFK; k++) {
+                    int fractionXDistance = baseXDistance / k;
+                    //check whether j + fractions of baseXDistance are within range (row + 1)
+                    //if j-i=8 then j + fractions will be j+4, j+2, etc
+                    if (baseXDistance % k == 0 && j + fractionXDistance < row + 1) { //k which can evenly divides baseXDistance e.g. if j-i is 6 then, k will be 2, 3
+                        int fractionYDistance = distance[j][j + fractionXDistance];
+                        if (distance[i][j] == fractionYDistance * k) {
+                            return false;
                         }
-                    } else {
-                        break;
                     }
                 }
 
